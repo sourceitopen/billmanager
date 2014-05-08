@@ -61,7 +61,7 @@ public class HomeScreen extends JFrame {
 		setVisible(true);
 	}
 
-	void searchFieldsPanel(JPanel searchPanel, Customer customer) {
+	void searchFieldsPanel(JPanel searchPanel, final Customer customer) {
 		Dimension d = new Dimension(200, 20);
 		JLabel label = new JLabel("Search A user here");
 		label.setPreferredSize(d);
@@ -70,17 +70,46 @@ public class HomeScreen extends JFrame {
 		searchField.setColumns(30);
 		searchField.setPreferredSize(d);
 		searchPanel.add(searchField);
-		JButton searchButton = new JButton("Search now");
+		JButton searchButton = new JButton("Search a user by name");
 		searchButton.setPreferredSize(d);
 		searchPanel.add(searchButton);
+		JButton listAllButton = new JButton("Show all data");
+		searchButton.setPreferredSize(d);
+		searchPanel.add(listAllButton);
 		searchButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Create a function to search fields
-
+				findUserAndUpdateList(customer,searchField.getText());	
+			}
+		});
+		listAllButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Create a function to search fields
+				setUpTableData(customer);	
 			}
 		});
 	}
 
+	void findUserAndUpdateList(Customer customer,String searchField){
+		
+		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
+		List<User> users = userDAO.findUserByName(customer, searchField);
+		tableModel.setRowCount(0);
+		String[] data = new String[8];
+		
+		for (int i = 0; i < users.size(); i++) {
+			data[0] = String.valueOf(i + 1);
+			data[1] = users.get(i).getName();
+			data[2] = users.get(i).getAmount().toString();
+			data[3] = users.get(i).getAmountPaid().toString();
+			data[4] = users.get(i).getInterest().toString();
+			data[5] = users.get(i).getInterestDate();
+			data[6] = users.get(i).getBillDate();
+			data[7] = "today";
+			tableModel.addRow(data);
+		}
+		jTable.setModel(tableModel);
+	}
 	void userListPanel(JPanel dataPanel, JPanel searchPanel, Customer customer) {
 		getJTable(dataPanel);
 		setUpTableData(customer);
@@ -90,6 +119,7 @@ public class HomeScreen extends JFrame {
 	public void setUpTableData(Customer customer) {
 		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
 		// TODO Get User data from database and populate
+		tableModel.setRowCount(0);
 		String[] data = new String[8];
 		List<User> users = userDAO.getUsersForCustomer(customer);
 

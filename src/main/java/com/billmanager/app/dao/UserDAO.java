@@ -9,4 +9,5 @@ public interface UserDAO {
 
 	public User saveUserData(User user);
 	public List<User> getUsersForCustomer(Customer customer);
+	public List<User> findUserByName(Customer customer,String name);
 }
