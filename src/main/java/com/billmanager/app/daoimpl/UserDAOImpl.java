@@ -1,5 +1,6 @@
 package com.billmanager.app.daoimpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -40,9 +41,23 @@ public class UserDAOImpl implements UserDAO{
 		
 	}
 
-	public User getUserData(User user) {
+
+	@Override
+	public List<User> getUsersForCustomer(Customer customer) {
 		// TODO Auto-generated method stub
-		return null;
+		ArrayList<User> users = new ArrayList<User>();
+		Session hibSession =HibernateUtils.getSessionFactory().openSession();
+		try{
+		users = (ArrayList<User>) hibSession.createCriteria(User.class).list();
+		System.out.println("user is"+users);
+		
+		return users;
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}finally{
+			hibSession.close();
+		}
 	}
 
 }

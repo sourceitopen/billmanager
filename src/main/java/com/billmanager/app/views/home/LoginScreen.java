@@ -21,33 +21,27 @@ import com.billmanager.app.domain.auth.Customer;
 
 public class LoginScreen extends JFrame{
 
-	@Autowired
-	CustomerDAO customerDao;
+	private static final long serialVersionUID = 1L;
 	
+	@Autowired
+	CustomerDAO customerDao;	
 	@Autowired
 	HomeScreen homeScreen;
 	
-		private static final long serialVersionUID = 1L;
-
-		
 
 		public void createAndShowLogin() {
 			setTitle("Login Please");
 			setLayout(new GridLayout(0,1));
 			JPanel pane = new JPanel(new GridLayout(0,1));
 			add(pane);
-			setSize(300, 200);
-			setVisible(true);
+			setSize(400, 200);
+			setLocation(600, 300);
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
-			JLabel nameLabel = new JLabel();
-			nameLabel.setText("Name :");
+			JLabel nameLabel = new JLabel("Name :");
 			final JTextField txt = new JTextField();
-			JLabel passwordLabel = new JLabel();
-			
-			passwordLabel.setText("Password :");
+			JLabel passwordLabel = new JLabel("Password :");
 			final JPasswordField ps = new JPasswordField(10);
-			JButton button = new JButton();
-			button.setText("Submit");
+			JButton button = new JButton("Submit");
 			pane.add(nameLabel);
 			pane.add(txt);
 			pane.add(passwordLabel);
@@ -60,20 +54,16 @@ public class LoginScreen extends JFrame{
 					if(customer instanceof Customer){
 					setVisible(false);	
 					homeScreen.startScreen(customer);	
-					System.out.println("customer found , next step to chage layout");	
 					}else{
 						JOptionPane.showMessageDialog(null, "Wrong username or password");
-						System.out.println("prompt error message");
 					}
 				}
 			});
-			
+			setVisible(true);
 		}
 		
 		Customer findCustomer(String username,char[] password){
 			String pass = new String(password);
-			System.out.println("password to be checked is "+pass+" and its current class is"+pass.getClass());
-			System.out.println("customer dao is"+customerDao);
 			Customer customer = customerDao.findCustomer(username, pass);
 			return customer;
 		}
