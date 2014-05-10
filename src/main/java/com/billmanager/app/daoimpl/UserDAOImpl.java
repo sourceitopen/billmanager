@@ -46,8 +46,7 @@ public class UserDAOImpl implements UserDAO {
 		ArrayList<User> users = new ArrayList<User>();
 		Session hibSession = HibernateUtils.getSessionFactory().openSession();
 		try {
-			users = (ArrayList<User>) hibSession.createCriteria(User.class)
-					.list();
+			users = (ArrayList<User>) hibSession.createCriteria(User.class).list();
 			System.out.println("user is" + users);
 
 			return users;
@@ -72,6 +71,32 @@ public class UserDAOImpl implements UserDAO {
 			System.out.println("user is" + users);
 
 			return users;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			hibSession.close();
+		}
+	}
+
+	@Override
+	public User updateUserData(User user) {
+		// System.out.println("reached to save user" + user);
+		Session hibSession = HibernateUtils.getSessionFactory().openSession();
+		User updateUser =(User)hibSession.load(User.class,user.getId());
+		updateUser.setName(user.getName());
+		updateUser.setAmount(user.getAmount());
+		updateUser.setAmountPaid(user.getAmountPaid());
+		updateUser.setBillDate(user.getBillDate());
+		updateUser.setInterest(user.getInterest());
+		updateUser.setInterestDate(user.getInterestDate());
+		updateUser.setAmountToBePaid(user.getAmount()-user.getAmountPaid());
+		System.out.println("user found is - "+updateUser.getId());
+		try {
+			Transaction tx = hibSession.beginTransaction();
+			hibSession.saveOrUpdate(updateUser);
+			tx.commit();
+			return updateUser;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

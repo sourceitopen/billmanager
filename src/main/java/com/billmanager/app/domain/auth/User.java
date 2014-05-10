@@ -23,6 +23,7 @@ public class User {
 	private Double amount;
 	private Double amountPaid;
 	private Double interest;
+	private Double amountToBePaid;
 	private String interestDate;
 	private String billDate;
 	private String lastUpdatedOn;
@@ -39,6 +40,16 @@ public class User {
 		this.lastUpdatedOn = lastUpdatedOn;
 	}
 	
+	public Long getId() {
+		return id;
+	}
+	
+	public Double getAmountToBePaid() {
+		return amountToBePaid;
+	}
+	public void setAmountToBePaid(Double amountToBePaid) {
+		this.amountToBePaid = amountToBePaid;
+	}
 	public Customer getCustomer(){
 		return this.customer;
 	}
