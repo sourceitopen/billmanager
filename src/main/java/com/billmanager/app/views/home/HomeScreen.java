@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.billmanager.app.dao.UserDAO;
 import com.billmanager.app.domain.auth.Customer;
 import com.billmanager.app.domain.auth.User;
+import com.billmanager.app.utils.Utilities;
 
 @Component
 public class HomeScreen {
@@ -140,7 +143,7 @@ public class HomeScreen {
 		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
 		// TODO Get User data from database and populate
 		tableModel.setRowCount(0);
-		String[] data = new String[8];
+		String[] data = new String[9];
 		List<User> users = userDAO.getUsersForCustomer(customer);
 		final UserTableView userTableView = new UserTableView(users);
 
@@ -298,10 +301,13 @@ public class HomeScreen {
 		user.setName(name);
 		user.setAmount(Double.parseDouble(amount));
 		user.setAmountPaid(Double.parseDouble(amountPaid));
+		user.setAmountToBePaid(Double.parseDouble(amount)-Double.parseDouble(amountPaid));
 		user.setInterest(Double.parseDouble(interest));
 		user.setInterestDate(interestDate);
 		user.setBillDate(billDate);
-		user.setLastUpdatedOn(new Date().toString());
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+		
+		user.setLastUpdatedOn(df.format(new Date()).toString());
 		user.setCustomer(customer);
 		return userDAO.saveUserData(user);
 	}

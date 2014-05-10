@@ -35,24 +35,17 @@ public class UserTableView extends AbstractTableModel {
 		Object value = "??";
 		User user = users.get(rowIndex);
 		switch (columnIndex) {
-		case 0:
-			value = user.getName();
-			break;
 		case 1:
 			value = user.getName();
-
 			break;
 		case 2:
 			value = user.getAmount().toString();
-
 			break;
 		case 3:
 			value = user.getAmountPaid().toString();
-
 			break;
 		case 4:
 			value = user.getAmountToBePaid().toString();
-
 			break;
 		case 5:
 			value = user.getInterest().toString();
