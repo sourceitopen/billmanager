@@ -7,6 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,13 @@ import com.billmanager.app.utils.HibernateUtils;
 @Component
 public class UserDAOImpl implements UserDAO {
 
+	@Autowired
+	private SessionFactory sessionFactory;
+
 	public User saveUserData(User user) {
 		// TODO Auto-generated method stub
 		System.out.println("reached to save user" + user);
-		Session hibSession = HibernateUtils.getSessionFactory().openSession();
+		Session hibSession = sessionFactory.openSession();
 		try {
 			Transaction tx = hibSession.beginTransaction();
 			hibSession.save(user);
@@ -44,10 +48,12 @@ public class UserDAOImpl implements UserDAO {
 	public List<User> getUsersForCustomer(Customer customer) {
 		// TODO Auto-generated method stub
 		ArrayList<User> users = new ArrayList<User>();
-		Session hibSession = HibernateUtils.getSessionFactory().openSession();
+		Session hibSession = sessionFactory.openSession();
 		try {
-			users = (ArrayList<User>) hibSession.createCriteria(User.class).list();
-			System.out.println("user is" + users);
+			Query query = hibSession
+					.createQuery("from User u where u.amountToBePaid!=0");
+			users = (ArrayList<User>) query.list();
+			System.out.println("users are" + users);
 
 			return users;
 		} catch (Exception e) {
@@ -62,13 +68,13 @@ public class UserDAOImpl implements UserDAO {
 	public List<User> findUserByName(Customer customer, String name) {
 		// TODO Auto-generated method stub
 		List<User> users = new ArrayList<User>();
-		Session hibSession = HibernateUtils.getSessionFactory().openSession();
+		Session hibSession = sessionFactory.openSession();
 		try {
 			Query query = hibSession
-					.createQuery("from User u where u.name like :name");
+					.createQuery("from User u where u.name like :name AND u.amountToBePaid!=0");
 			query.setParameter("name", name);
 			users = query.list();
-			System.out.println("user is" + users);
+			System.out.println("user after finding by username" + users);
 
 			return users;
 		} catch (Exception e) {
@@ -82,16 +88,20 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public User updateUserData(User user) {
 		// System.out.println("reached to save user" + user);
-		Session hibSession = HibernateUtils.getSessionFactory().openSession();
-		User updateUser =(User)hibSession.load(User.class,user.getId());
+		Session hibSession = sessionFactory.openSession();
+		User updateUser = (User) hibSession.load(User.class, user.getId());
 		updateUser.setName(user.getName());
 		updateUser.setAmount(user.getAmount());
-		updateUser.setAmountPaid(user.getAmountPaid());
+		if (user.getAmountPaid() != null || user.getAmountPaid() != 0) {
+			updateUser.setLastUpdatedOn(user.getLastUpdatedOn());
+			updateUser.setInterestDate(user.getInterestDate());
+		}
+		updateUser.setAmountPaid(user.getAmountPaid()+updateUser.getAmountPaid());
 		updateUser.setBillDate(user.getBillDate());
 		updateUser.setInterest(user.getInterest());
-		updateUser.setInterestDate(user.getInterestDate());
-		updateUser.setAmountToBePaid(user.getAmount()-user.getAmountPaid());
-		System.out.println("user found is - "+updateUser.getId());
+		updateUser.setAmountToBePaid(user.getAmountToBePaid()
+				- user.getAmountPaid());
+		System.out.println("user found is - " + updateUser.getId());
 		try {
 			Transaction tx = hibSession.beginTransaction();
 			hibSession.saveOrUpdate(updateUser);

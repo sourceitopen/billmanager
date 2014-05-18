@@ -1,15 +1,20 @@
 package com.billmanager.app.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class Utilities {
 
-	public static Date convertToDate(String receivedDate) throws ParseException{
-		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-		Date date = formatter.parse(receivedDate);
-		return date;
+
+	public static DateTime convertToDateTime(String enteredDate){
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+		DateTime dt = formatter.parseDateTime(enteredDate);
+		return dt;
 	}
-	
+	public static String convertDateTimeToString(DateTime date){
+		DateTimeFormatter format = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+		String convertedDate = format.print(date);
+		return convertedDate;
+	}
 }

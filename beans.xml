@@ -15,6 +15,34 @@
 <context:annotation-config />
 <aop:aspectj-autoproxy />
 <context:component-scan base-package="com.billmanager.app"/>
-<bean id="loginScreen" class="com.billmanager.app.views.home.LoginScreen"></bean>
+<bean id="loginScreen" class="com.billmanager.app.views.home.LoginScreen" scope="prototype"></bean>
 <bean id="logAspect" class="com.billmanager.app.aspect.InterestUpdaterAspect" />
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+    destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+    <property name="url" value="jdbc:mysql://localhost:3306/billmanager" />
+    <property name="username" value="root" />
+    <property name="password" value="oodles" />
+  </bean>
+  <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"></property>
+    <property name="hibernateProperties">
+      <props>
+        <prop 
+         key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+        <prop key="hibernate.show_sql">true</prop>
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+      </props>
+    </property>
+    <property name="packagesToScan" value="com.billmanager.app.domain.auth" />
+  </bean>
+  
+  <bean id="transactionManager"
+    class="org.springframework.orm.hibernate4.HibernateTransactionManager" 
+    p:sessionFactory-ref="sessionFactory">
+  </bean>
+
+
+
+
 </beans>

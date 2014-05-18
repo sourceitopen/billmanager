@@ -15,8 +15,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        System.out.println( "Starting application" );
-//       
+        System.out.println( "Starting application" );       
         ApplicationContext ctx=new FileSystemXmlApplicationContext("beans.xml");
         LoginScreen loginScreen = (LoginScreen)ctx.getBean("loginScreen");
     	loginScreen.createAndShowLogin();  

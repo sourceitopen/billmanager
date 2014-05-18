@@ -31,7 +31,6 @@ public class UserTableView extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		// TODO Auto-generated method stub
 		Object value = "??";
 		User user = users.get(rowIndex);
 		switch (columnIndex) {

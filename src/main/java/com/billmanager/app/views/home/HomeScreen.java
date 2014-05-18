@@ -6,9 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -26,6 +23,9 @@ import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,7 +75,7 @@ public class HomeScreen {
 		editUserFrame.add(panel, BorderLayout.NORTH);
 		editUserFrame.setSize(1000, 900);
 		editUserFrame.setLocation(100, 100);
-		editUserFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		editUserFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		billEditPanel(panel, user);
 		editUserFrame.pack();
 		editUserFrame.setVisible(true);
@@ -113,10 +113,11 @@ public class HomeScreen {
 	void findUserAndUpdateList(Customer customer, String searchField) {
 
 		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
+		tableModel.setRowCount(0);
 		List<User> users = userDAO.findUserByName(customer, searchField);
 		UserTableView userTableView = new UserTableView(users);
 		
-		String[] data = new String[8];
+		String[] data = new String[9];
 
 		for (int i = 0; i < users.size(); i++) {
 			data[0] = String.valueOf(i + 1);
@@ -154,9 +155,9 @@ public class HomeScreen {
 			data[3] = (String) userTableView.getValueAt(i, 3);
 			data[4] = (String) userTableView.getValueAt(i, 4);
 			data[5] = (String) userTableView.getValueAt(i, 5);
-			data[6] = (String) userTableView.getValueAt(i, 6);
-			data[7] = (String) userTableView.getValueAt(i, 7);
-			data[8] = (String) userTableView.getValueAt(i, 8);
+			data[6] = (String)userTableView.getValueAt(i, 6);
+			data[7] = (String)userTableView.getValueAt(i, 7);
+			data[8] = (String)userTableView.getValueAt(i, 8);
 			tableModel.addRow(data);
 		}
 		jTable.setModel(tableModel);
@@ -165,6 +166,7 @@ public class HomeScreen {
 			public void mouseClicked(java.awt.event.MouseEvent e)
 			{
 				int row = jTable.rowAtPoint(e.getPoint());
+				System.out.println("clicked user row"+row);
 				editForm(userTableView.getUserAt(row));
 			}
 		});
@@ -187,7 +189,7 @@ public class HomeScreen {
 			data[5] = (String) userTableView.getValueAt(i, 5);
 			data[6] = (String) userTableView.getValueAt(i, 6);
 			data[7] = (String) userTableView.getValueAt(i, 7);
-			data[8] = (String) userTableView.getValueAt(i, 8);
+			data[8] = (String)userTableView.getValueAt(i, 8);
 			tableModel.addRow(data);
 		}
 		jTable.setModel(tableModel);
@@ -220,20 +222,14 @@ public class HomeScreen {
 		final JTextField name = new JTextField(user.getName());
 		panel.add(name);
 		panel.add(new JLabel("Billing Date:"));
-		final JTextField billDate = new JTextField(user.getBillDate());
+		final JTextField billDate = new JTextField(user.getBillDate().toString());
 		panel.add(billDate);
-		panel.add(new JLabel("Amount : "));
-		final JTextField amount = new JTextField(user.getAmount().toString());
-		panel.add(amount);
-		panel.add(new JLabel("Amount Paid : "));
-		final JTextField amountPaid = new JTextField(user.getAmountPaid().toString());
+		panel.add(new JLabel("Amount to be paid: ")); 
+		panel.add(new JLabel(user.getAmountToBePaid().toString()));
+		//panel.add(amount);
+		panel.add(new JLabel("Now Paying : "));
+		final JTextField amountPaid = new JTextField();
 		panel.add(amountPaid);
-		panel.add(new JLabel("Interest : "));
-		final JTextField interest = new JTextField(user.getInterest().toString());
-		panel.add(interest);
-		panel.add(new JLabel("Interest Date : "));
-		final JTextField interestDate = new JTextField(user.getInterestDate());
-		panel.add(interestDate);
 		panel.add(new JLabel(""));
 		JButton button = new JButton();
 		button.setText("Save Changes");
@@ -242,8 +238,7 @@ public class HomeScreen {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			User updatedUser = updateBillInfo(name.getText(), billDate.getText(),
-						amount.getText(), amountPaid.getText(),
-						interest.getText(), interestDate.getText(), user);
+						amountPaid.getText(), user);
 			updateTable(updatedUser, user.getCustomer());
 			}
 		});
@@ -262,12 +257,7 @@ public class HomeScreen {
 		panel.add(new JLabel("Amount Paid : "));
 		final JTextField amountPaid = new JTextField();
 		panel.add(amountPaid);
-		panel.add(new JLabel("Interest : "));
-		final JTextField interest = new JTextField();
-		panel.add(interest);
-		panel.add(new JLabel("Interest Date : "));
-		final JTextField interestDate = new JTextField();
-		panel.add(interestDate);
+		
 		panel.add(new JLabel(""));
 		JButton button = new JButton();
 		button.setText("Submit");
@@ -277,7 +267,7 @@ public class HomeScreen {
 			public void actionPerformed(ActionEvent e) {
 				User user = saveBillInfo(name.getText(), billDate.getText(),
 						amount.getText(), amountPaid.getText(),
-						interest.getText(), interestDate.getText(), customer);
+						 customer);
 				if (user instanceof User) {
 					JOptionPane.showMessageDialog(null, "User" + user.getName()
 							+ " has been successfully saved");
@@ -293,8 +283,7 @@ public class HomeScreen {
 	}
 
 	User saveBillInfo(String name, String billDate, String amount,
-			String amountPaid, String interest, String interestDate,
-			Customer customer) {
+			String amountPaid,Customer customer) {
 		GregorianCalendar calender = new GregorianCalendar();
 		calender.getTime();
 		User user = new User();
@@ -302,27 +291,22 @@ public class HomeScreen {
 		user.setAmount(Double.parseDouble(amount));
 		user.setAmountPaid(Double.parseDouble(amountPaid));
 		user.setAmountToBePaid(Double.parseDouble(amount)-Double.parseDouble(amountPaid));
-		user.setInterest(Double.parseDouble(interest));
-		user.setInterestDate(interestDate);
+		user.setInterest(0.0);
+		user.setInterestDate(Utilities.convertDateTimeToString(new DateTime().plusDays(15)));
 		user.setBillDate(billDate);
-		DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-		
-		user.setLastUpdatedOn(df.format(new Date()).toString());
+		user.setLastUpdatedOn(Utilities.convertDateTimeToString(new DateTime()));
 		user.setCustomer(customer);
 		return userDAO.saveUserData(user);
 	}
 	
-	User updateBillInfo(String name, String billDate, String amount,
-			String amountPaid, String interest, String interestDate,User user) {
-		GregorianCalendar calender = new GregorianCalendar();
-		calender.getTime();
+	User updateBillInfo(String name, String billDate,
+			String amountPaid,User user) {
 		user.setName(name);
-		user.setAmount(Double.parseDouble(amount));
+		//user.setAmount(Double.parseDouble(amount));
 		user.setAmountPaid(Double.parseDouble(amountPaid));
-		user.setInterest(Double.parseDouble(interest));
-		user.setInterestDate(interestDate);
+		user.setInterestDate(Utilities.convertDateTimeToString(new DateTime()));
 		user.setBillDate(billDate);
-		user.setLastUpdatedOn(new Date().toString());
+		user.setLastUpdatedOn(Utilities.convertDateTimeToString(new DateTime()));
 		return userDAO.updateUserData(user);
 	}
 }
